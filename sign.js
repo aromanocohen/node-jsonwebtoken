@@ -62,6 +62,21 @@ function validatePayload(payload) {
   return validate(registered_claims_schema, true, payload, 'payload');
 }
 
+function mergeObjects() {
+    var resObj = {};
+    for(var i=0; i < arguments.length; i += 1) {
+         var obj = arguments[i];
+         var keys = [];
+         if (obj !== undefined && obj !== null) {
+             keys = Object.keys(obj);           
+         };
+         for(var j=0; j < keys.length; j += 1) {
+             resObj[keys[j]] = obj[keys[j]];
+         }
+    }
+    return resObj;
+}
+
 var options_to_payload = {
   'audience': 'aud',
   'issuer': 'iss',
@@ -90,7 +105,13 @@ module.exports = function (payload, secretOrPrivateKey, options, callback) {
   var isObjectPayload = typeof payload === 'object' &&
                         !Buffer.isBuffer(payload);
 
-  var header = Object.assign({
+  //var header = Object.assign({
+  //  alg: options.algorithm || 'HS256',
+  //  typ: isObjectPayload ? 'JWT' : undefined,
+  //  kid: options.keyid
+  //}, options.header);
+
+  var header = mergeObjects({
     alg: options.algorithm || 'HS256',
     typ: isObjectPayload ? 'JWT' : undefined,
     kid: options.keyid
@@ -117,7 +138,8 @@ module.exports = function (payload, secretOrPrivateKey, options, callback) {
       return failure(error);
     }
     if (!options.mutatePayload) {
-      payload = Object.assign({},payload);
+      //payload = Object.assign({},payload);
+      payload = mergeObjects({},payload);
     }
   } else {
     var invalid_options = options_for_objects.filter(function (opt) {
